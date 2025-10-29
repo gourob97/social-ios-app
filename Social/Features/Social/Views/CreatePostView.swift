@@ -9,7 +9,7 @@ import SwiftUI
 
 struct CreatePostView: View {
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var userSession: UserSession
+    @Environment(UserSession.self) var userSession: UserSession
     @State private var content = ""
     @State private var imageUrl = ""
     @State private var isLoading = false
@@ -72,7 +72,7 @@ struct CreatePostView: View {
         
         Task {
             do {
-                let newPost = try await APIService.shared.createPost(
+                let newPost = try await SocialService.shared.createPost(
                     content: trimmedContent,
                     imageUrl: finalImageUrl,
                     userId: currentUser.id
@@ -94,5 +94,5 @@ struct CreatePostView: View {
 
 #Preview {
     CreatePostView { _ in }
-        .environmentObject(UserSession())
+        .environment(UserSession())
 }

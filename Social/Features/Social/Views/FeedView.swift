@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct FeedView: View {
-    @EnvironmentObject var userSession: UserSession
+    @Environment(UserSession.self) var userSession: UserSession
     @State private var posts: [Post] = []
     @State private var isLoading = false
     @State private var errorMessage = ""
@@ -81,7 +81,7 @@ struct FeedView: View {
         
         Task {
             do {
-                let fetchedPosts = try await APIService.shared.getAllPosts()
+                let fetchedPosts = try await SocialService.shared.getAllPosts()
                 await MainActor.run {
                     self.posts = fetchedPosts
                     self.isLoading = false
@@ -98,7 +98,7 @@ struct FeedView: View {
 
 struct PostRowView: View {
     let post: Post
-    @EnvironmentObject var userSession: UserSession
+    @Environment(UserSession.self)  var userSession: UserSession
     @State private var showingComments = false
     @State private var isLiked = false
     @State private var isLiking = false
@@ -208,9 +208,9 @@ struct PostRowView: View {
         Task {
             do {
                 if isLiked {
-                    _ = try await APIService.shared.unlikePost(id: post.id, userId: currentUser.id)
+                    _ = try await SocialService.shared.unlikePost(id: post.id, userId: currentUser.id)
                 } else {
-                    _ = try await APIService.shared.likePost(id: post.id, userId: currentUser.id)
+                    _ = try await SocialService.shared.likePost(id: post.id, userId: currentUser.id)
                 }
                 
                 await MainActor.run {
@@ -259,6 +259,6 @@ struct PostRowView: View {
     )
     
     return PostRowView(post: samplePost)
-        .environmentObject(UserSession())
+        .environment(UserSession())
         .padding()
 }

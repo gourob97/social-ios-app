@@ -34,7 +34,7 @@ struct AuthView: View {
 }
 
 struct LoginView: View {
-    @EnvironmentObject var userSession: UserSession
+    @Environment(UserSession.self) var userSession: UserSession
     @State private var emailOrUsername = ""
     @State private var password = ""
     @State private var isLoading = false
@@ -78,13 +78,13 @@ struct LoginView: View {
                 let email = emailOrUsername.contains("@") ? emailOrUsername : nil
                 let username = emailOrUsername.contains("@") ? nil : emailOrUsername
                 
-                let loginResponse = try await APIService.shared.login(
+                let loginResponse = try await AuthService.shared.login(
                     email: email,
                     username: username,
                     password: password
                 )
                 
-                let user = try await APIService.shared.getUserProfile(id: loginResponse.id)
+                let user = try await AuthService.shared.getUserProfile(id: loginResponse.id)
                 
                 await MainActor.run {
                     userSession.login(user: user)
@@ -101,7 +101,7 @@ struct LoginView: View {
 }
 
 struct RegisterView: View {
-    @EnvironmentObject var userSession: UserSession
+    @Environment(UserSession.self) var userSession: UserSession
     @State private var username = ""
     @State private var email = ""
     @State private var password = ""
@@ -148,7 +148,7 @@ struct RegisterView: View {
         
         Task {
             do {
-                let user = try await APIService.shared.register(
+                let user = try await AuthService.shared.register(
                     username: username,
                     email: email,
                     password: password
@@ -170,5 +170,5 @@ struct RegisterView: View {
 
 #Preview {
     AuthView()
-        .environmentObject(UserSession())
+        .environment(UserSession())
 }

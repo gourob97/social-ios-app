@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ProfileView: View {
-    @EnvironmentObject var userSession: UserSession
+    @Environment(UserSession.self) var userSession: UserSession
     @State private var isEditing = false
     @State private var fullName = ""
     @State private var bio = ""
@@ -111,7 +111,7 @@ struct ProfileView: View {
         
         Task {
             do {
-                let updatedUser = try await APIService.shared.updateProfile(
+                let updatedUser = try await AuthService.shared.updateProfile(
                     id: currentUser.id,
                     fullName: trimmedFullName.isEmpty ? nil : trimmedFullName,
                     bio: trimmedBio.isEmpty ? nil : trimmedBio,
@@ -191,5 +191,5 @@ struct EditProfileView: View {
 
 #Preview {
     ProfileView()
-        .environmentObject(UserSession())
+        .environment(UserSession())
 }

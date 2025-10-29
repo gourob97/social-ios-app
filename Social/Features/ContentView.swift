@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ContentView: View {
-    @StateObject private var userSession = UserSession()
+    @State private var userSession = UserSession()
     
     var body: some View {
         Group {
@@ -18,7 +18,7 @@ struct ContentView: View {
                 AuthView()
             }
         }
-        .environmentObject(userSession)
+        .environment(userSession)
     }
 }
 

@@ -10,7 +10,7 @@ import SwiftUI
 struct CommentsView: View {
     let postId: Int
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var userSession: UserSession
+    @Environment(UserSession.self)var userSession: UserSession
     @State private var comments: [Comment] = []
     @State private var newCommentText = ""
     @State private var isLoading = false
@@ -71,7 +71,7 @@ struct CommentsView: View {
         
         Task {
             do {
-                let fetchedComments = try await APIService.shared.getComments(postId: postId)
+                let fetchedComments = try await SocialService.shared.getComments(postId: postId)
                 await MainActor.run {
                     self.comments = fetchedComments
                     self.isLoading = false
@@ -93,7 +93,7 @@ struct CommentsView: View {
         
         Task {
             do {
-                let newComment = try await APIService.shared.addComment(
+                let newComment = try await SocialService.shared.addComment(
                     postId: postId,
                     content: commentText,
                     userId: currentUser.id
@@ -184,5 +184,5 @@ struct CommentRowView: View {
     )
     
     return CommentsView(postId: 1)
-        .environmentObject(UserSession())
+        .environment(UserSession())
 }
