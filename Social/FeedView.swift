@@ -126,16 +126,15 @@ struct PostRowView: View {
                 VStack(alignment: .leading) {
                     Text(post.user.fullName ?? post.user.username)
                         .font(.headline)
-                    Text("@\(post.user.username)")
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                    Text(formatDate(post.createdAt))
                         .font(.caption)
                         .foregroundColor(.gray)
                 }
                 
                 Spacer()
                 
-                Text(formatDate(post.createdAt))
-                    .font(.caption)
-                    .foregroundColor(.gray)
             }
             
             // Post content
