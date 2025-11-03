@@ -142,21 +142,8 @@ struct PostRowView: View {
                 .font(.body)
             
             // Post image
-            if let imageUrl = post.imageUrl {
-                AsyncImage(url: URL(string: imageUrl)) { image in
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                } placeholder: {
-                    Rectangle()
-                        .fill(Color.gray.opacity(0.3))
-                        .frame(height: 200)
-                        .overlay(
-                            ProgressView()
-                        )
-                }
-                .frame(maxHeight: 300)
-                .cornerRadius(8)
+            if let imageUrl = post.imageUrl, let url = URL(string: imageUrl) {
+                CustomAsyncImage(url: url)
             }
             
             // Action buttons
