@@ -75,7 +75,7 @@ struct CreatePostView: View {
                 let newPost = try await SocialService.shared.createPost(
                     content: trimmedContent,
                     imageUrl: finalImageUrl,
-                    userId: currentUser.id
+                    userSession: userSession
                 )
                 
                 await MainActor.run {
@@ -94,5 +94,5 @@ struct CreatePostView: View {
 
 #Preview {
     CreatePostView { _ in }
-        .environment(UserSession())
+        .environment(UserSession.shared)
 }

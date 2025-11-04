@@ -15,6 +15,7 @@ struct Post: Codable, Identifiable {
     let imageUrl: String?
     let createdAt: String
     let user: User
+    let isLiked: Bool?
 }
 
 struct CreatePostRequest: Codable {

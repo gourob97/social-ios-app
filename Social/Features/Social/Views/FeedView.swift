@@ -9,44 +9,42 @@ import SwiftUI
 
 struct FeedView: View {
     @Environment(UserSession.self) var userSession: UserSession
-    @State private var posts: [Post] = []
-    @State private var isLoading = false
-    @State private var errorMessage = ""
+    @State private var feedViewModel = FeedViewModel()
     @State private var showingCreatePost = false
     
     var body: some View {
         NavigationView {
             VStack {
-                if isLoading && posts.isEmpty {
+                if feedViewModel.isLoading && feedViewModel.posts.isEmpty {
                     ProgressView("Loading posts...")
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else if posts.isEmpty && !errorMessage.isEmpty {
+                } else if feedViewModel.posts.isEmpty && !feedViewModel.errorMessage.isEmpty {
                     VStack {
                         Text("Error loading posts")
                             .font(.headline)
-                        Text(errorMessage)
+                        Text(feedViewModel.errorMessage)
                             .font(.caption)
                             .foregroundColor(.red)
                         Button("Retry") {
-                            loadPosts()
+                            feedViewModel.loadPosts()
                         }
                         .buttonStyle(.borderedProminent)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else if posts.isEmpty {
+                } else if feedViewModel.posts.isEmpty {
                     Text("No posts yet")
                         .font(.headline)
                         .foregroundColor(.gray)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
-                    List(posts) { post in
-                        PostRowView(post: post)
+                    List(feedViewModel.posts) { post in
+                        PostRowView(post: post, feedViewModel: feedViewModel)
                             .listRowSeparator(.hidden)
                             .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                     }
                     .listStyle(PlainListStyle())
                     .refreshable {
-                        loadPosts()
+                        feedViewModel.loadPosts()
                     }
                 }
             }
@@ -66,42 +64,26 @@ struct FeedView: View {
             }
             .sheet(isPresented: $showingCreatePost) {
                 CreatePostView(onPostCreated: { newPost in
-                    posts.insert(newPost, at: 0)
+                    feedViewModel.addNewPost(newPost)
                 })
             }
         }
-        .onAppear {
-            loadPosts()
-        }
     }
-    
-    private func loadPosts() {
-        isLoading = true
-        errorMessage = ""
-        
-        Task {
-            do {
-                let fetchedPosts = try await SocialService.shared.getAllPosts()
-                await MainActor.run {
-                    self.posts = fetchedPosts
-                    self.isLoading = false
-                }
-            } catch {
-                await MainActor.run {
-                    self.errorMessage = error.localizedDescription
-                    self.isLoading = false
-                }
-            }
-        }
-    }
+
 }
 
 struct PostRowView: View {
     let post: Post
-    @Environment(UserSession.self)  var userSession: UserSession
+    let feedViewModel: FeedViewModel
+    @Environment(UserSession.self) var userSession: UserSession
     @State private var showingComments = false
-    @State private var isLiked = false
     @State private var isLiking = false
+   
+    
+    init(post: Post, feedViewModel: FeedViewModel) {
+        self.post = post
+        self.feedViewModel = feedViewModel
+    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -150,8 +132,8 @@ struct PostRowView: View {
             HStack(spacing: 30) {
                 Button(action: toggleLike) {
                     HStack(spacing: 4) {
-                        Image(systemName: isLiked ? "heart.fill" : "heart")
-                            .foregroundColor(isLiked ? .red : .gray)
+                        Image(systemName: post.isLiked ?? false ? "heart.fill" : "heart")
+                            .foregroundColor(post.isLiked  ?? false ? .red : .gray)
                         Text("Like")
                             .font(.caption)
                             .foregroundColor(.primary)
@@ -188,39 +170,23 @@ struct PostRowView: View {
     }
     
     private func toggleLike() {
-        guard let currentUser = userSession.currentUser else { return }
-        
         isLiking = true
         
-        Task {
-            do {
-                if isLiked {
-                    _ = try await SocialService.shared.unlikePost(id: post.id, userId: currentUser.id)
-                } else {
-                    _ = try await SocialService.shared.likePost(id: post.id, userId: currentUser.id)
-                }
-                
-                await MainActor.run {
-                    isLiked.toggle()
-                    isLiking = false
-                }
-            } catch {
-                await MainActor.run {
-                    isLiking = false
-                }
-            }
+        feedViewModel.toggleLike(for: post, isCurrentlyLiked: post.isLiked ?? false) { newLikeState in
+            isLiking = false
         }
     }
     
     private func formatDate(_ dateString: String) -> String {
-        let formatter = ISO8601DateFormatter()
-        if let date = formatter.date(from: dateString) {
-            let displayFormatter = DateFormatter()
-            displayFormatter.dateStyle = .short
-            displayFormatter.timeStyle = .short
-            return displayFormatter.string(from: date)
-        }
-        return dateString
+        let isoFormatter = ISO8601DateFormatter()
+        guard let date = isoFormatter.date(from: dateString) else { return "" }
+
+        let displayFormatter = DateFormatter()
+        displayFormatter.dateStyle = .medium
+        displayFormatter.timeStyle = .short
+        displayFormatter.doesRelativeDateFormatting = true
+
+        return displayFormatter.string(from: date)
     }
 }
 
@@ -242,10 +208,11 @@ struct PostRowView: View {
         content: "This is a sample post content that demonstrates how posts will look in the feed.",
         imageUrl: nil,
         createdAt: "2025-10-28T10:30:00",
-        user: sampleUser
+        user: sampleUser,
+        isLiked: false
     )
     
-    return PostRowView(post: samplePost)
-        .environment(UserSession())
+     PostRowView(post: samplePost, feedViewModel: FeedViewModel())
+        .environment(UserSession.shared)
         .padding()
 }

@@ -96,7 +96,7 @@ struct CommentsView: View {
                 let newComment = try await SocialService.shared.addComment(
                     postId: postId,
                     content: commentText,
-                    userId: currentUser.id
+                    userSession: userSession
                 )
                 
                 await MainActor.run {
@@ -183,6 +183,6 @@ struct CommentRowView: View {
         profileImageUrl: nil
     )
     
-    return CommentsView(postId: 1)
-        .environment(UserSession())
+    CommentsView(postId: 1)
+        .environment(UserSession.shared)
 }

@@ -191,5 +191,5 @@ struct EditProfileView: View {
 
 #Preview {
     ProfileView()
-        .environment(UserSession())
+        .environment(UserSession.shared)
 }

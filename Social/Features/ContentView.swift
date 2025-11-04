@@ -8,17 +8,30 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var userSession = UserSession()
+    @State private var authViewModel = AuthViewModel()
+    private let userSession = UserSession.shared
     
     var body: some View {
         Group {
-            if userSession.isLoggedIn {
+            if authViewModel.isLoading && !authViewModel.isLoggedIn {
+                // Show loading screen while checking for stored auth token
+                VStack {
+                    ProgressView()
+                        .scaleEffect(1.5)
+                    Text("Loading...")
+                        .font(.headline)
+                        .padding(.top)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color(.systemBackground))
+            } else if authViewModel.isLoggedIn {
                 MainTabView()
             } else {
                 AuthView()
             }
         }
         .environment(userSession)
+        .environment(authViewModel)
     }
 }
 

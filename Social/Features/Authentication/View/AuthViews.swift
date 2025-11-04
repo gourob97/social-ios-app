@@ -35,6 +35,7 @@ struct AuthView: View {
 
 struct LoginView: View {
     @Environment(UserSession.self) var userSession: UserSession
+    @State private var authviewmodel = AuthViewModel()
     @State private var emailOrUsername = ""
     @State private var password = ""
     @State private var isLoading = false
@@ -69,35 +70,12 @@ struct LoginView: View {
         .padding()
     }
     
-    private func login() {
-        isLoading = true
-        errorMessage = ""
-        
+    func login() {
         Task {
-            do {
-                let email = emailOrUsername.contains("@") ? emailOrUsername : nil
-                let username = emailOrUsername.contains("@") ? nil : emailOrUsername
-                
-                let loginResponse = try await AuthService.shared.login(
-                    email: email,
-                    username: username,
-                    password: password
-                )
-                
-                let user = try await AuthService.shared.getUserProfile(id: loginResponse.id)
-                
-                await MainActor.run {
-                    userSession.login(user: user)
-                    isLoading = false
-                }
-            } catch {
-                await MainActor.run {
-                    errorMessage = error.localizedDescription
-                    isLoading = false
-                }
-            }
+            await authviewmodel.login(email: emailOrUsername, username: emailOrUsername, password: password)
         }
     }
+    
 }
 
 struct RegisterView: View {
@@ -155,7 +133,6 @@ struct RegisterView: View {
                 )
                 
                 await MainActor.run {
-                    userSession.login(user: user)
                     isLoading = false
                 }
             } catch {
@@ -170,5 +147,5 @@ struct RegisterView: View {
 
 #Preview {
     AuthView()
-        .environment(UserSession())
+        .environment(UserSession.shared)
 }
