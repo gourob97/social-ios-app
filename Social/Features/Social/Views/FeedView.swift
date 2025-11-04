@@ -178,8 +178,11 @@ struct PostRowView: View {
     }
     
     private func formatDate(_ dateString: String) -> String {
-        let isoFormatter = ISO8601DateFormatter()
-        guard let date = isoFormatter.date(from: dateString) else { return "" }
+        let inputFormatter = DateFormatter()
+        inputFormatter.locale = Locale(identifier: "en_US_POSIX")
+        inputFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS"
+
+        guard let date = inputFormatter.date(from: dateString) else { return "" }
 
         let displayFormatter = DateFormatter()
         displayFormatter.dateStyle = .medium
@@ -216,3 +219,6 @@ struct PostRowView: View {
         .environment(UserSession.shared)
         .padding()
 }
+
+
+
