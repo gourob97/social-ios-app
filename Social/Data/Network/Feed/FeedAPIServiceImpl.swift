@@ -21,4 +21,41 @@ class FeedAPIServiceImpl: FeedAPIService {
             throw error
         }
     }
+    
+    func likePost(id: Int, userSession: UserSession) async throws -> Void {
+        let headers: HTTPHeaders = [
+            "Authorization": "Bearer \(String(describing: userSession.authToken))",
+            "Content-Type": "application/json"
+        ]
+        do {
+            return try await networkService.executeRequest(
+                AF.request(
+                    Endpoints.Posts.like(postId: id),
+                    method: .post,
+                    headers: headers
+                )
+            )
+        } catch {
+            throw error
+        }
+    }
+    
+    func unlikePost(id: Int, userSession: UserSession) async throws -> Void {
+        
+        let headers: HTTPHeaders = [
+            "Authorization": "Bearer \(String(describing: userSession.authToken))",
+            "Content-Type": "application/json"
+        ]
+        
+        do {
+            return try await networkService.executeRequest(
+                AF.request(Endpoints.Posts.like(postId: id),
+                           method: .delete,
+                           headers: headers
+                          )
+            )
+        } catch {
+            throw error
+        }
+    }
 }

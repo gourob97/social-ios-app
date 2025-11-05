@@ -29,6 +29,17 @@ class BaseNetworkService {
         }
     }
     
+    func executeRequest(_ request: DataRequest) async throws {
+        do {
+            _ = try await request
+                .validate()
+                .serializingData()
+                .value
+        } catch {
+            throw parseError(error)
+        }
+    }
+    
     
     private func parseAFError(_ error: AFError, _ data: Data?) -> NetworkError {
             if let data = data,

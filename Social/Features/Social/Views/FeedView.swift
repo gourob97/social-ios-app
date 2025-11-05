@@ -172,9 +172,9 @@ struct PostRowView: View {
     private func toggleLike() {
         isLiking = true
         
-//        feedViewModel.toggleLike(for: post, isCurrentlyLiked: post.isLiked ?? false) { newLikeState in
-//            isLiking = false
-//        }
+        feedViewModel.toggleLike(for: post, isCurrentlyLiked: post.isLiked) { newLikeState in
+            isLiking = false
+        }
     }
     
     private func formatDate(_ dateString: String) -> String {

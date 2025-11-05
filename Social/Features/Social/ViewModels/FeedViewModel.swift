@@ -48,7 +48,7 @@ class FeedViewModel {
         posts.insert(post, at: 0)
     }
     
-    func toggleLike(for post: Post, isCurrentlyLiked: Bool, completion: @escaping (Bool) -> Void) {
+    func toggleLike(for post: PostUiModel, isCurrentlyLiked: Bool, completion: @escaping (Bool) -> Void) {
         guard userSession.currentUser != nil else {
             print("User not logged in")
             completion(isCurrentlyLiked) // Return original state
@@ -58,13 +58,16 @@ class FeedViewModel {
         Task {
             do {
                 if isCurrentlyLiked {
-                    _ = try await socialService.unlikePost(id: post.id, userSession: userSession)
+                    _ = try await feedRepository.unlikePost(id: post.id, userSession: userSession)
                 } else {
-                    _ = try await socialService.likePost(id: post.id, userSession: userSession)
+                    _ = try await feedRepository.likePost(id: post.id, userSession: userSession)
                 }
                 
                 await MainActor.run {
                     completion(!isCurrentlyLiked) // Return toggled state
+                    if let index = posts.firstIndex(where: { $0.id == post.id }) {
+                        posts[index].isLiked.toggle()
+                    }
                 }
             } catch {
                 await MainActor.run {

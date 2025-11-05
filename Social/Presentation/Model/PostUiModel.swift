@@ -14,7 +14,7 @@ struct PostUiModel: Identifiable {
     let userName: String
     let imageUrl: String?
     let createdAt: String
-    let isLiked: Bool
+    var isLiked: Bool
     let displayName: String
 }
 
