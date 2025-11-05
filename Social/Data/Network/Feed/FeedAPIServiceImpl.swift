@@ -58,4 +58,27 @@ class FeedAPIServiceImpl: FeedAPIService {
             throw error
         }
     }
+    
+    func createPost(content: String, imageUrl: String?, userSession: UserSession) async throws -> PostDTO {
+        let headers: HTTPHeaders = [
+            "Authorization": "Bearer \(String(describing: userSession.authToken))",
+            "Content-Type": "application/json"
+        ]
+        
+        let requestBody = CreatePostRequest(content: content, imageUrl: imageUrl)
+        
+        do {
+            return try await networkService.executeRequest(
+                AF.request(
+                    Endpoints.Posts.posts,
+                    method: .post,
+                    parameters: requestBody,
+                    encoder: JSONParameterEncoder.default,
+                    headers: headers,
+                )
+            )
+        } catch {
+            throw error
+        }
+    }
 }

@@ -18,7 +18,8 @@ struct Post: Codable, Identifiable {
     let isLiked: Bool
 }
 
-struct CreatePostRequest: Codable {
+
+nonisolated struct CreatePostRequest: Codable{
     let content: String
     let imageUrl: String?
 }

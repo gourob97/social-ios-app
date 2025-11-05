@@ -63,9 +63,7 @@ struct FeedView: View {
                 }
             }
             .sheet(isPresented: $showingCreatePost) {
-                CreatePostView(onPostCreated: { newPost in
-                    feedViewModel.addNewPost(newPost)
-                })
+                CreatePostView()
             }
         }
     }

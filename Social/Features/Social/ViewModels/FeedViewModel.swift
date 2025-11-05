@@ -30,7 +30,6 @@ class FeedViewModel {
         
         Task {
             do {
-                let fetchedPosts = try await socialService.getAllPosts()
                 self.posts =  try await feedRepository.fetchFeed().map { post in
                     post.toUiModel()
                 }
@@ -42,10 +41,6 @@ class FeedViewModel {
                 }
             }
         }
-    }
-    
-    func addNewPost(_ post: PostUiModel) {
-        posts.insert(post, at: 0)
     }
     
     func toggleLike(for post: PostUiModel, isCurrentlyLiked: Bool, completion: @escaping (Bool) -> Void) {

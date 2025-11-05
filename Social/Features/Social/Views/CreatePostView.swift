@@ -7,6 +7,28 @@
 
 import SwiftUI
 
+
+@Observable
+class CreatePostViewModel {
+    
+    var feedRepository: FeedRepository
+    var isLoading = false
+    var errorMessage = ""
+    
+    init(feedRepository: FeedRepository = FeedRepositoryImpl()) {
+        self.feedRepository = feedRepository
+    }
+    
+    func createPost(content: String, imageUrl: String?, userSession: UserSession) async {
+        do {
+            _ = try await feedRepository.createPost(content: content, imageUrl: imageUrl, userSession: userSession)
+        }
+        catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+}
+
 struct CreatePostView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(UserSession.self) var userSession: UserSession
@@ -15,7 +37,8 @@ struct CreatePostView: View {
     @State private var isLoading = false
     @State private var errorMessage = ""
     
-    let onPostCreated: (PostUiModel) -> Void
+    @State var createPostViewModel = CreatePostViewModel()
+    
     
     var body: some View {
         NavigationView {
@@ -61,38 +84,17 @@ struct CreatePostView: View {
     }
     
     private func createPost() {
-        guard let currentUser = userSession.currentUser else { return }
-        
-        isLoading = true
-        errorMessage = ""
         
         let trimmedContent = content.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedImageUrl = imageUrl.trimmingCharacters(in: .whitespacesAndNewlines)
         let finalImageUrl = trimmedImageUrl.isEmpty ? nil : trimmedImageUrl
-        
         Task {
-            do {
-                let newPost = try await SocialService.shared.createPost(
-                    content: trimmedContent,
-                    imageUrl: finalImageUrl,
-                    userSession: userSession
-                )
-                
-                await MainActor.run {
-                    //onPostCreated(newPost)
-                    dismiss()
-                }
-            } catch {
-                await MainActor.run {
-                    errorMessage = error.localizedDescription
-                    isLoading = false
-                }
-            }
+            await createPostViewModel.createPost(content: trimmedContent, imageUrl: finalImageUrl, userSession: userSession)
         }
     }
 }
 
 #Preview {
-    CreatePostView { _ in }
+    CreatePostView ()
         .environment(UserSession.shared)
 }
