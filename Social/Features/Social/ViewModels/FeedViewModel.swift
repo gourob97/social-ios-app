@@ -9,12 +9,14 @@ import Foundation
 
 @Observable
 class FeedViewModel {
-    var posts: [Post] = []
+    var posts: [PostUiModel] = []
     var isLoading = false
     var errorMessage = ""
     
     private let socialService = SocialService.shared
     private let userSession = UserSession.shared
+    
+    private let feedRepository = FeedRepositoryImpl()
     
     init() {
         loadPosts()
@@ -29,10 +31,10 @@ class FeedViewModel {
         Task {
             do {
                 let fetchedPosts = try await socialService.getAllPosts()
-                await MainActor.run {
-                    self.posts = fetchedPosts
-                    self.isLoading = false
+                self.posts =  try await feedRepository.fetchFeed().map { post in
+                    post.toUiModel()
                 }
+                self.isLoading = false
             } catch {
                 await MainActor.run {
                     self.errorMessage = error.localizedDescription
@@ -42,7 +44,7 @@ class FeedViewModel {
         }
     }
     
-    func addNewPost(_ post: Post) {
+    func addNewPost(_ post: PostUiModel) {
         posts.insert(post, at: 0)
     }
     

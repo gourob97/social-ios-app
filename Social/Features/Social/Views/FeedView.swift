@@ -73,14 +73,14 @@ struct FeedView: View {
 }
 
 struct PostRowView: View {
-    let post: Post
+    let post: PostUiModel
     let feedViewModel: FeedViewModel
     @Environment(UserSession.self) var userSession: UserSession
     @State private var showingComments = false
     @State private var isLiking = false
    
     
-    init(post: Post, feedViewModel: FeedViewModel) {
+    init(post: PostUiModel, feedViewModel: FeedViewModel) {
         self.post = post
         self.feedViewModel = feedViewModel
     }
@@ -89,7 +89,7 @@ struct PostRowView: View {
         VStack(alignment: .leading, spacing: 12) {
             // User info
             HStack {
-                AsyncImage(url: URL(string: post.user.profileImageUrl ?? "")) { image in
+                AsyncImage(url: URL(string: post.imageUrl ?? "")) { image in
                     image
                         .resizable()
                         .aspectRatio(contentMode: .fill)
@@ -97,7 +97,7 @@ struct PostRowView: View {
                     Circle()
                         .fill(Color.gray.opacity(0.3))
                         .overlay(
-                            Text(String(post.user.username.prefix(1)).uppercased())
+                            Text(post.displayName.prefix(1).uppercased())
                                 .font(.caption)
                                 .foregroundColor(.white)
                         )
@@ -106,11 +106,11 @@ struct PostRowView: View {
                 .clipShape(Circle())
                 
                 VStack(alignment: .leading) {
-                    Text(post.user.fullName ?? post.user.username)
+                    Text(post.displayName)
                         .font(.headline)
                         .lineLimit(1)
                         .truncationMode(.tail)
-                    Text(formatDate(post.createdAt))
+                    Text(post.createdAt)
                         .font(.caption)
                         .foregroundColor(.gray)
                 }
@@ -132,8 +132,8 @@ struct PostRowView: View {
             HStack(spacing: 30) {
                 Button(action: toggleLike) {
                     HStack(spacing: 4) {
-                        Image(systemName: post.isLiked ?? false ? "heart.fill" : "heart")
-                            .foregroundColor(post.isLiked  ?? false ? .red : .gray)
+                        Image(systemName: post.isLiked  ? "heart.fill" : "heart")
+                            .foregroundColor(post.isLiked ? .red : .gray)
                         Text("Like")
                             .font(.caption)
                             .foregroundColor(.primary)
@@ -172,9 +172,9 @@ struct PostRowView: View {
     private func toggleLike() {
         isLiking = true
         
-        feedViewModel.toggleLike(for: post, isCurrentlyLiked: post.isLiked ?? false) { newLikeState in
-            isLiking = false
-        }
+//        feedViewModel.toggleLike(for: post, isCurrentlyLiked: post.isLiked ?? false) { newLikeState in
+//            isLiking = false
+//        }
     }
     
     private func formatDate(_ dateString: String) -> String {
@@ -215,9 +215,9 @@ struct PostRowView: View {
         isLiked: false
     )
     
-     PostRowView(post: samplePost, feedViewModel: FeedViewModel())
-        .environment(UserSession.shared)
-        .padding()
+//     PostRowView(post: samplePost, feedViewModel: FeedViewModel())
+//        .environment(UserSession.shared)
+//        .padding()
 }
 
 

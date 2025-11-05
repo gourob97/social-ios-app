@@ -2,12 +2,12 @@
 //  Post.swift
 //  Social
 //
-//  Created by Gourob Mazumder on 29/10/25.
+//  Created by Gourob Mazumder on 5/11/25.
 //
 
 import Foundation
 
-// MARK: - Post Models
+
 struct Post: Codable, Identifiable {
     let id: Int
     let userId: Int
@@ -15,7 +15,7 @@ struct Post: Codable, Identifiable {
     let imageUrl: String?
     let createdAt: String
     let user: User
-    let isLiked: Bool?
+    let isLiked: Bool
 }
 
 struct CreatePostRequest: Codable {

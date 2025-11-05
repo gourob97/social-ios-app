@@ -15,7 +15,7 @@ struct CreatePostView: View {
     @State private var isLoading = false
     @State private var errorMessage = ""
     
-    let onPostCreated: (Post) -> Void
+    let onPostCreated: (PostUiModel) -> Void
     
     var body: some View {
         NavigationView {
@@ -79,7 +79,7 @@ struct CreatePostView: View {
                 )
                 
                 await MainActor.run {
-                    onPostCreated(newPost)
+                    //onPostCreated(newPost)
                     dismiss()
                 }
             } catch {
